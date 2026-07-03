@@ -1,0 +1,31 @@
+{
+    "name": "@luckyclover/cliente",
+    "version": "1.0.0",
+    "private": true,
+    "type": "module",
+    "engines": {
+        "node": "22.x"
+    },
+    "scripts": {
+        "dev": "vite",
+        "build": "tsc && vite build",
+        "preview": "vite preview"
+    },
+    "dependencies": {
+        "@supabase/supabase-js": "^2.50.0",
+        "jspdf": "^4.1.0",
+        "jspdf-autotable": "^5.0.7",
+        "lucide-react": "^0.562.0",
+        "react": "^18.3.0",
+        "react-dom": "^18.3.0",
+        "react-router-dom": "^6.28.0",
+        "zustand": "^5.0.11"
+    },
+    "devDependencies": {
+        "@types/react": "^18.3.0",
+        "@types/react-dom": "^18.3.0",
+        "@vitejs/plugin-react": "^4.3.0",
+        "typescript": "^5.6.0",
+        "vite": "^5.4.0"
+    }
+}

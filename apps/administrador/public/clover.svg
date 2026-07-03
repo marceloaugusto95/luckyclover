@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" role="img" aria-label="LuckyClover">
+  <g transform="translate(50,52)">
+    <path d="M3,3 C7,20 11,27 3,36" fill="none" stroke="#15803d" stroke-width="4" stroke-linecap="round"/>
+    <g fill="#16a34a">
+      <path transform="rotate(0)"   d="M0,0 C0,-10 -12,-12 -12,-22 C-12,-30 -4,-32 0,-24 C4,-32 12,-30 12,-22 C12,-12 0,-10 0,0 Z"/>
+      <path transform="rotate(90)"  d="M0,0 C0,-10 -12,-12 -12,-22 C-12,-30 -4,-32 0,-24 C4,-32 12,-30 12,-22 C12,-12 0,-10 0,0 Z"/>
+      <path transform="rotate(180)" d="M0,0 C0,-10 -12,-12 -12,-22 C-12,-30 -4,-32 0,-24 C4,-32 12,-30 12,-22 C12,-12 0,-10 0,0 Z"/>
+      <path transform="rotate(270)" d="M0,0 C0,-10 -12,-12 -12,-22 C-12,-30 -4,-32 0,-24 C4,-32 12,-30 12,-22 C12,-12 0,-10 0,0 Z"/>
+    </g>
+    <circle r="4.5" fill="#15803d"/>
+  </g>
+</svg>

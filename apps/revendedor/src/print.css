@@ -1,0 +1,94 @@
+/**
+ * Print Stylesheet for Thermal Printers (58mm / ~2.25 inches)
+ * Optimized for Stone T6900 / SUNMI P2 devices
+ * 
+ * This stylesheet is used when window.print() is called.
+ * It hides all app UI and displays only the print container.
+ */
+
+/* Screen styles - hide the print container normally */
+#print-container {
+    display: none !important;
+}
+
+/* Print-specific styles */
+@media print {
+    /* Hide everything except the print container */
+    body * {
+        visibility: hidden;
+    }
+
+    /* Reset body for clean printing */
+    body {
+        margin: 0;
+        padding: 0;
+        background: white !important;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+    }
+
+    /* Show and position the print container */
+    #print-container,
+    #print-container * {
+        visibility: visible;
+    }
+
+    #print-container {
+        display: block !important;
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        
+        /* Typography for thermal printers */
+        font-family: 'Courier New', Courier, monospace;
+        font-size: 12pt;
+        line-height: 1.2;
+        color: black;
+        background: white;
+        
+        /* Remove any padding/margins */
+        margin: 0;
+        padding: 8px;
+        box-sizing: border-box;
+    }
+
+    /* Thermal paper width constraint */
+    @page {
+        /* 58mm paper = ~2.28 inches, printable area ~48mm = ~1.89 inches */
+        size: 58mm auto;
+        margin: 0;
+    }
+
+    /* Ticket content styling */
+    .print-ticket {
+        width: 100%;
+        text-align: center;
+        white-space: pre-wrap;
+        word-wrap: break-word;
+    }
+
+    .print-ticket .divider {
+        display: block;
+        border-bottom: 1px dashed black;
+        margin: 4px 0;
+    }
+
+    .print-ticket .header {
+        font-weight: bold;
+        font-size: 14pt;
+        margin-bottom: 4px;
+    }
+
+    .print-ticket .numbers {
+        font-size: 14pt;
+        font-weight: bold;
+        letter-spacing: 2px;
+        margin: 8px 0;
+    }
+
+    .print-ticket .footer {
+        font-size: 10pt;
+        margin-top: 8px;
+    }
+}

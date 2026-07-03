@@ -1,0 +1,19 @@
+{
+    "compilerOptions": {
+        "lib": [
+            "deno.window",
+            "deno.ns",
+            "dom"
+        ],
+        "types": [
+            "https://deno.land/x/types/index.d.ts"
+        ]
+    },
+    "imports": {
+        "@supabase/functions-js": "jsr:@supabase/functions-js@^2",
+        "@supabase/supabase-js": "https://esm.sh/@supabase/supabase-js@2",
+        "@std/crypto": "jsr:@std/crypto",
+        "djwt": "https://deno.land/x/djwt@v3.0.2/mod.ts"
+    },
+    "lock": false
+}
