@@ -217,6 +217,11 @@ export default function LoginPage() {
                             required
                             minLength={6}
                         />
+                        {isLogin && (
+                            <p style={{ fontSize: '0.75rem', color: 'var(--muted-foreground)', marginTop: '0.35rem' }}>
+                                🔓 Demo: qualquer senha é aceita.
+                            </p>
+                        )}
                     </div>
 
                     {!isLogin && (

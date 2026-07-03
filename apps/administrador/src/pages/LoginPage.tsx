@@ -84,6 +84,9 @@ export default function LoginPage() {
                             placeholder="••••••••"
                             required
                         />
+                        <p style={{ fontSize: '0.75rem', color: 'var(--muted-foreground)', marginTop: '0.35rem' }}>
+                            🔓 Demo: qualquer senha é aceita.
+                        </p>
                     </div>
 
                     {error && (
