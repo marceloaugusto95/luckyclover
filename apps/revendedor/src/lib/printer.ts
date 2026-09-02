@@ -321,8 +321,15 @@ async function triggerBrowserPrint(
                 document.body.appendChild(container);
             }
 
-            // Set the content (wrapped in a pre tag for monospace formatting)
-            container.innerHTML = `<pre class="print-ticket">${content}</pre>`;
+            // Set the content (wrapped in a pre tag for monospace formatting).
+            // Usa textContent, e nao innerHTML: o ticket carrega dados digitados
+            // por terceiros (nome e TELEFONE do cliente, este sem toUpperCase),
+            // que com innerHTML eram injetados como HTML na origem do PDV --
+            // onde fica o token do revendedor no localStorage.
+            const pre = document.createElement("pre");
+            pre.className = "print-ticket";
+            pre.textContent = content;
+            container.replaceChildren(pre);
 
             // Small delay to ensure DOM is updated, then print
             setTimeout(() => {

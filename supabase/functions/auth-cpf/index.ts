@@ -125,14 +125,45 @@ async function signSupabaseJwt(
   );
 }
 
+// Remove o hash da senha antes de devolver o perfil ao cliente.
+// O login precisa do hash para conferir a senha, mas ele jamais deve sair do
+// servidor: os apps guardam a resposta inteira em localStorage, o que deixava
+// o PBKDF2 de cada usuário exposto a quebra offline.
+function sanitizeUser<T extends Record<string, unknown>>(user: T) {
+  const { password_hash: _omit, ...safe } = user;
+  return safe;
+}
+
 // Verify Admin Middleware
-async function verifyAdmin(req: Request): Promise<boolean> {
+async function verifyAdmin(req: Request, supabase: any): Promise<boolean> {
   const token = req.headers.get("x-admin-token");
   if (!token) return false;
   try {
     const key = await getJwtKey();
     const payload = await verify(token, key);
-    return payload.user_role === "admin";
+    if (payload.user_role !== "admin") return false;
+
+    // Marco de revogação: um token emitido ANTES de profiles.tokens_valid_from
+    // não vale mais. É o que permite deslogar sessões sem rotacionar o
+    // JWT_SECRET do projeto -- que também assina a anon key e a service_role
+    // key, e cuja troca derrubaria os três apps e as Edge Functions.
+    // O PostgREST já aplica a mesma regra via is_admin(); aqui fechamos o
+    // caminho do x-admin-token, que não passa pelo banco.
+    const { data: perfil } = await supabase
+      .from("profiles")
+      .select("tokens_valid_from")
+      .eq("id", payload.sub)
+      .single();
+
+    if (perfil?.tokens_valid_from) {
+      const iatMs = Number(payload.iat ?? 0) * 1000;
+      if (iatMs < new Date(perfil.tokens_valid_from).getTime()) {
+        console.warn("Admin token revogado (anterior a tokens_valid_from)");
+        return false;
+      }
+    }
+
+    return true;
   } catch (err) {
     console.error("Token verification failed:", err);
     return false;
@@ -202,7 +233,7 @@ Deno.serve(async (req) => {
       const jwt = await signSupabaseJwt(user, expSeconds);
 
       return new Response(
-        JSON.stringify({ success: true, token: jwt, user }),
+        JSON.stringify({ success: true, token: jwt, user: sanitizeUser(user) }),
         {
           status: 200,
           headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -226,7 +257,7 @@ Deno.serve(async (req) => {
 
       // Security Check: Only admins can register users with non-client roles
       if (requestedRole !== "client") {
-        if (!await verifyAdmin(req)) {
+        if (!await verifyAdmin(req, supabase)) {
           return new Response(
             JSON.stringify({
               error: "Unauthorized to create admin/reseller accounts",
@@ -290,7 +321,7 @@ Deno.serve(async (req) => {
       const jwt = await signSupabaseJwt(newUser, regExpSeconds);
 
       return new Response(
-        JSON.stringify({ success: true, token: jwt, user: newUser }),
+        JSON.stringify({ success: true, token: jwt, user: sanitizeUser(newUser) }),
         {
           status: 200,
           headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -300,7 +331,7 @@ Deno.serve(async (req) => {
 
     // --- DELETE USER (Admin Only) ---
     if (action === "delete_user") {
-      if (!await verifyAdmin(req)) {
+      if (!await verifyAdmin(req, supabase)) {
         return new Response(
           JSON.stringify({ error: "Unauthorized" }),
           {
@@ -321,14 +352,10 @@ Deno.serve(async (req) => {
         );
       }
 
-      // Delete from profiles (Cascading should handle other tables if configured, otherwise we manual delete)
-      // We assume bets and resellers references will cascade or we should delete them first.
-      // Let's rely on DB cascade if possible, or try deletions.
-
-      // 1. Delete bets?
+      // 1. Delete bets
       await supabase.from("bets").delete().eq("user_id", target_id);
 
-      // 2. Delete resellers?
+      // 2. Delete resellers
       await supabase.from("resellers").delete().eq("user_id", target_id);
 
       // 3. Delete profile
@@ -358,7 +385,7 @@ Deno.serve(async (req) => {
 
     // --- RESET PASSWORD (Admin Only) ---
     if (action === "reset_password") {
-      if (!await verifyAdmin(req)) {
+      if (!await verifyAdmin(req, supabase)) {
         return new Response(
           JSON.stringify({ error: "Unauthorized" }),
           {
@@ -406,7 +433,7 @@ Deno.serve(async (req) => {
 
     // --- UPDATE SYSTEM SETTINGS (Admin Only) ---
     if (action === "update_settings") {
-      if (!await verifyAdmin(req)) {
+      if (!await verifyAdmin(req, supabase)) {
         return new Response(
           JSON.stringify({ error: "Unauthorized" }),
           {
