@@ -103,10 +103,16 @@ Deno.serve(async (req: Request) => {
       ? firstBet.client_cpf.replace(/\D/g, "")
       : "";
 
+    // Política: por padrão o pagador PODE ser diferente do titular -- é comum
+    // alguém pagar a aposta de outra pessoa --, mas a divergência é sempre
+    // registrada para conciliação. Onde a regra de negócio exigir coincidência
+    // (prevenção à lavagem), basta definir a env PIX_REQUIRE_MATCHING_CPF=true
+    // na Edge Function, sem alterar código.
     if (betCpf && payloadCpf !== betCpf) {
       console.warn(`CPF Mismatch: Payload ${payloadCpf} vs Bet ${betCpf}`);
-      // We could block here, but for now we'll allow it but log it.
-      // Ideally: throw new Error("CPF does not match the bet owner");
+      if (Deno.env.get("PIX_REQUIRE_MATCHING_CPF") === "true") {
+        throw new Error("CPF do pagador difere do titular da aposta");
+      }
     }
 
     // 3. Calculate Correct Price (Server-Side)
